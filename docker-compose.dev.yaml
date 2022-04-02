@@ -1,0 +1,54 @@
+# Use root/example as user/password credentials
+version: '3.1'
+
+volumes:
+  redis-data:
+  db-data:
+  mongo-data:
+
+services:
+  db:
+    image: mariadb:10.7
+    restart: always
+    environment:
+      MARIADB_ROOT_PASSWORD: example
+    volumes:
+      - db-data:/var/lib/mysql
+    ports:
+      - 33060:3306
+
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 9999:8080
+  
+  redis:
+    image: redis:6.2.6-alpine
+    command: --appendonly yes
+    restart: always
+    volumes:
+      - redis-data:/data
+    ports:
+      - 63790:6379
+  
+  mongo:
+    image: mongo:5.0.6
+    restart: always
+    ports:
+      - 27018:27017
+    volumes:
+      - mongo-data:/data/db
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
+
+  mongo-express:
+    image: mongo-express
+    restart: always
+    ports:
+      - 8081:8081
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: root
+      ME_CONFIG_MONGODB_ADMINPASSWORD: example
+      ME_CONFIG_MONGODB_URL: mongodb://root:example@mongo:27017/
